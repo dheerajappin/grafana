@@ -68,6 +68,8 @@ export interface Props extends Themeable {
   onMoveForward: () => void;
   onZoom: () => void;
   history?: TimeRange[];
+  hideQuickRanges?: boolean;
+  hideOtherRanges?: boolean;
 }
 
 export interface State {
@@ -107,6 +109,8 @@ export class UnthemedTimeRangePicker extends PureComponent<Props, State> {
       theme,
       history,
       onChangeTimeZone,
+      hideQuickRanges,
+      hideOtherRanges,
     } = this.props;
 
     const { isOpen } = this.state;
@@ -146,6 +150,8 @@ export class UnthemedTimeRangePicker extends PureComponent<Props, State> {
                   history={history}
                   showHistory
                   onChangeTimeZone={onChangeTimeZone}
+                  hideQuickRanges={hideQuickRanges}
+                  hideOtherRanges={hideOtherRanges}
                 />
               </ClickOutsideWrapper>
             )}
