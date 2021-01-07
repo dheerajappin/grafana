@@ -14,7 +14,7 @@ const isValidTimeRange = (range: any) => {
   return dateMath.isValid(range.from) && dateMath.isValid(range.to);
 };
 
-export interface Props {
+export interface TimeRangeInputProps {
   value: TimeRange;
   timeZone?: TimeZone;
   onChange: (timeRange: TimeRange) => void;
@@ -28,7 +28,7 @@ export interface Props {
 
 const noop = () => {};
 
-export const TimeRangeInput: FC<Props> = ({
+export const TimeRangeInput: FC<TimeRangeInputProps> = ({
   value,
   onChange,
   onChangeTimeZone,
