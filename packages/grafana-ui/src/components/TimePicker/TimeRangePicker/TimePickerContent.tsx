@@ -11,7 +11,7 @@ import { TimeRangeForm } from './TimeRangeForm';
 import { TimeRangeList } from './TimeRangeList';
 import { TimePickerFooter } from './TimePickerFooter';
 
-const getStyles = stylesFactory((theme: GrafanaTheme, isReversed, isRightSideVisible) => {
+const getStyles = stylesFactory((theme: GrafanaTheme, isReversed, hideQuickRanges) => {
   const containerBorder = theme.isDark ? theme.palette.dark9 : theme.palette.gray5;
 
   return {
@@ -38,7 +38,7 @@ const getStyles = stylesFactory((theme: GrafanaTheme, isReversed, isRightSideVis
       display: flex;
       flex-direction: column;
       border-right: ${isReversed ? 'none' : `1px solid ${theme.colors.border1}`};
-      width: ${isRightSideVisible ? '60%' : '100%'};
+      width: ${!hideQuickRanges ? '60%' : '100%'};
       overflow: hidden;
       order: ${isReversed ? 1 : 0};
 
@@ -49,7 +49,6 @@ const getStyles = stylesFactory((theme: GrafanaTheme, isReversed, isRightSideVis
     rightSide: css`
       width: 40% !important;
       border-right: ${isReversed ? `1px solid ${theme.colors.border1}` : 'none'};
-      display: ${isRightSideVisible ? 'block' : 'none'};
 
       @media only screen and (max-width: ${theme.breakpoints.lg}) {
         width: 100% !important;
@@ -84,12 +83,12 @@ const getNarrowScreenStyles = stylesFactory((theme: GrafanaTheme) => {
   };
 });
 
-const getFullScreenStyles = stylesFactory((theme: GrafanaTheme, isRightSideVisible) => {
+const getFullScreenStyles = stylesFactory((theme: GrafanaTheme, hideQuickRanges) => {
   return {
     container: css`
       padding-top: 9px;
       padding-left: 11px;
-      padding-right: ${isRightSideVisible ? '20%' : '11px'};
+      padding-right: ${!hideQuickRanges ? '20%' : '11px'};
     `,
     title: css`
       margin-bottom: 11px;
@@ -137,7 +136,6 @@ interface Props {
   /** Reverse the order of relative and absolute range pickers. Used to left align the picker in forms */
   isReversed?: boolean;
   hideQuickRanges?: boolean;
-  hideOtherRanges?: boolean;
 }
 
 interface PropsWithScreenSize extends Props {
@@ -147,17 +145,13 @@ interface PropsWithScreenSize extends Props {
 interface FormProps extends Omit<Props, 'history'> {
   visible: boolean;
   historyOptions?: TimeOption[];
-}
-
-interface FullscreenFormProps extends FormProps {
-  isRightSideVisible: boolean;
+  hideQuickRanges?: boolean;
 }
 
 export const TimePickerContentWithScreenSize: React.FC<PropsWithScreenSize> = props => {
-  const { quickOptions = [], otherOptions = [], isFullscreen, hideQuickRanges, hideOtherRanges } = props;
-  const isRightSideVisible = !isFullscreen || !hideQuickRanges || !hideOtherRanges;
+  const { quickOptions = [], otherOptions = [], isFullscreen, hideQuickRanges } = props;
   const theme = useTheme();
-  const styles = getStyles(theme, props.isReversed, isRightSideVisible);
+  const styles = getStyles(theme, props.isReversed, hideQuickRanges);
   const historyOptions = mapToHistoryOptions(props.history, props.timeZone);
 
   return (
@@ -168,33 +162,38 @@ export const TimePickerContentWithScreenSize: React.FC<PropsWithScreenSize> = pr
             {...props}
             visible={isFullscreen}
             historyOptions={historyOptions}
-            isRightSideVisible={isRightSideVisible}
+            hideQuickRanges={hideQuickRanges}
           />
         </div>
-        <CustomScrollbar className={styles.rightSide}>
-          <NarrowScreenForm {...props} visible={!isFullscreen} historyOptions={historyOptions} />
-          {!hideQuickRanges && (
-            <>
-              <TimeRangeList
-                title="Relative time ranges"
-                options={quickOptions}
-                onSelect={props.onChange}
-                value={props.value}
-                timeZone={props.timeZone}
-              />
-              <div className={styles.spacing} />
-            </>
-          )}
-          {!hideOtherRanges && (
-            <TimeRangeList
-              title="Other quick ranges"
-              options={otherOptions}
-              onSelect={props.onChange}
-              value={props.value}
-              timeZone={props.timeZone}
+        {(!isFullscreen || !hideQuickRanges) && (
+          <CustomScrollbar className={styles.rightSide}>
+            <NarrowScreenForm
+              {...props}
+              visible={!isFullscreen}
+              historyOptions={historyOptions}
+              hideQuickRanges={hideQuickRanges}
             />
-          )}
-        </CustomScrollbar>
+            {!hideQuickRanges && (
+              <>
+                <TimeRangeList
+                  title="Relative time ranges"
+                  options={quickOptions}
+                  onSelect={props.onChange}
+                  value={props.value}
+                  timeZone={props.timeZone}
+                />
+                <div className={styles.spacing} />
+                <TimeRangeList
+                  title="Other quick ranges"
+                  options={otherOptions}
+                  onSelect={props.onChange}
+                  value={props.value}
+                  timeZone={props.timeZone}
+                />
+              </>
+            )}
+          </CustomScrollbar>
+        )}
       </div>
       {!props.hideTimeZone && isFullscreen && (
         <TimePickerFooter timeZone={props.timeZone} onChangeTimeZone={props.onChangeTimeZone} />
@@ -214,7 +213,7 @@ const NarrowScreenForm: React.FC<FormProps> = props => {
   const theme = useTheme();
   const styles = getNarrowScreenStyles(theme);
   const isAbsolute = isDateTime(props.value.raw.from) || isDateTime(props.value.raw.to);
-  const [collapsed, setCollapsed] = useState(isAbsolute);
+  const [collapsed, setCollapsed] = useState(!isAbsolute && !props.hideQuickRanges);
 
   if (!props.visible) {
     return null;
@@ -228,9 +227,9 @@ const NarrowScreenForm: React.FC<FormProps> = props => {
         onClick={() => setCollapsed(!collapsed)}
       >
         <TimePickerTitle>Absolute time range</TimePickerTitle>
-        {<Icon name={collapsed ? 'angle-up' : 'angle-down'} />}
+        {<Icon name={!collapsed ? 'angle-up' : 'angle-down'} />}
       </div>
-      {collapsed && (
+      {!collapsed && (
         <div className={styles.body}>
           <div className={styles.form}>
             <TimeRangeForm
@@ -256,9 +255,9 @@ const NarrowScreenForm: React.FC<FormProps> = props => {
   );
 };
 
-const FullScreenForm: React.FC<FullscreenFormProps> = props => {
+const FullScreenForm: React.FC<FormProps> = props => {
   const theme = useTheme();
-  const styles = getFullScreenStyles(theme, props.isRightSideVisible);
+  const styles = getFullScreenStyles(theme, props.hideQuickRanges);
 
   if (!props.visible) {
     return null;
