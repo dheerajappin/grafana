@@ -51,6 +51,40 @@ describe('TimePickerContent', () => {
     );
     expect(wrapper).toMatchSnapshot();
   });
+
+  it('renders without ranges', () => {
+    const value = createTimeRange('2019-12-17T07:48:27.433Z', '2019-12-18T07:48:27.433Z');
+
+    const wrapper = shallow(
+      <TimePickerContentWithScreenSize
+        onChangeTimeZone={() => {}}
+        onChange={value => {}}
+        timeZone="utc"
+        value={value}
+        isFullscreen={true}
+        hideQuickRanges={true}
+      />
+    );
+
+    expect(wrapper).toMatchSnapshot();
+  });
+
+  it('renders form when ranges are hidden', () => {
+    const value = createTimeRange('2019-12-17T07:48:27.433Z', '2019-12-18T07:48:27.433Z');
+
+    const wrapper = shallow(
+      <TimePickerContentWithScreenSize
+        onChangeTimeZone={() => {}}
+        onChange={value => {}}
+        timeZone="utc"
+        value={value}
+        isFullscreen={false}
+        hideQuickRanges={true}
+      />
+    );
+
+    expect(wrapper).toMatchSnapshot();
+  });
 });
 
 function createTimeRange(from: string, to: string): TimeRange {

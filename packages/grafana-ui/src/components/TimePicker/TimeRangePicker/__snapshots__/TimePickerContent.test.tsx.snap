@@ -2,13 +2,13 @@
 
 exports[`TimePickerContent renders correctly in full screen 1`] = `
 <div
-  className="css-ajr8sn"
+  className="css-1rs50ne"
 >
   <div
-    className="css-ooqtr4"
+    className="css-erqwtd"
   >
     <div
-      className="css-1f2wc71"
+      className="css-sglo5p"
     >
       <FullScreenForm
         historyOptions={Array []}
@@ -35,7 +35,7 @@ exports[`TimePickerContent renders correctly in full screen 1`] = `
       autoHide={false}
       autoHideDuration={200}
       autoHideTimeout={200}
-      className="css-10t714z"
+      className="css-8crqn6"
       hideTracksWhenNotNeeded={false}
       setScrollTop={[Function]}
     >
@@ -74,7 +74,7 @@ exports[`TimePickerContent renders correctly in full screen 1`] = `
         }
       />
       <div
-        className="css-1ogeuxc"
+        className="css-1nhbw8q"
       />
       <TimeRangeList
         onSelect={[Function]}
@@ -103,13 +103,13 @@ exports[`TimePickerContent renders correctly in full screen 1`] = `
 
 exports[`TimePickerContent renders correctly in narrow screen 1`] = `
 <div
-  className="css-ajr8sn"
+  className="css-1rs50ne"
 >
   <div
-    className="css-ooqtr4"
+    className="css-243bs7"
   >
     <div
-      className="css-1f2wc71"
+      className="css-sglo5p"
     >
       <FullScreenForm
         historyOptions={Array []}
@@ -136,7 +136,7 @@ exports[`TimePickerContent renders correctly in narrow screen 1`] = `
       autoHide={false}
       autoHideDuration={200}
       autoHideTimeout={200}
-      className="css-10t714z"
+      className="css-8crqn6"
       hideTracksWhenNotNeeded={false}
       setScrollTop={[Function]}
     >
@@ -175,7 +175,7 @@ exports[`TimePickerContent renders correctly in narrow screen 1`] = `
         }
       />
       <div
-        className="css-1ogeuxc"
+        className="css-1nhbw8q"
       />
       <TimeRangeList
         onSelect={[Function]}
@@ -198,15 +198,79 @@ exports[`TimePickerContent renders correctly in narrow screen 1`] = `
 </div>
 `;
 
-exports[`TimePickerContent renders recent absolute ranges correctly 1`] = `
+exports[`TimePickerContent renders form when ranges are hidden 1`] = `
 <div
-  className="css-ajr8sn"
+  className="css-1rs50ne"
 >
   <div
-    className="css-ooqtr4"
+    className="css-erqwtd"
   >
     <div
-      className="css-1f2wc71"
+      className="css-1wvl3n4"
+    >
+      <FullScreenForm
+        hideQuickRanges={true}
+        historyOptions={Array []}
+        isFullscreen={false}
+        onChange={[Function]}
+        onChangeTimeZone={[Function]}
+        timeZone="utc"
+        value={
+          Object {
+            "from": "2019-12-17T07:48:27.433Z",
+            "raw": Object {
+              "from": "2019-12-17T07:48:27.433Z",
+              "to": "2019-12-18T07:48:27.433Z",
+            },
+            "to": "2019-12-18T07:48:27.433Z",
+          }
+        }
+        visible={false}
+      />
+    </div>
+    <CustomScrollbar
+      autoHeightMax="100%"
+      autoHeightMin="0"
+      autoHide={false}
+      autoHideDuration={200}
+      autoHideTimeout={200}
+      className="css-8crqn6"
+      hideTracksWhenNotNeeded={false}
+      setScrollTop={[Function]}
+    >
+      <NarrowScreenForm
+        hideQuickRanges={true}
+        historyOptions={Array []}
+        isFullscreen={false}
+        onChange={[Function]}
+        onChangeTimeZone={[Function]}
+        timeZone="utc"
+        value={
+          Object {
+            "from": "2019-12-17T07:48:27.433Z",
+            "raw": Object {
+              "from": "2019-12-17T07:48:27.433Z",
+              "to": "2019-12-18T07:48:27.433Z",
+            },
+            "to": "2019-12-18T07:48:27.433Z",
+          }
+        }
+        visible={true}
+      />
+    </CustomScrollbar>
+  </div>
+</div>
+`;
+
+exports[`TimePickerContent renders recent absolute ranges correctly 1`] = `
+<div
+  className="css-1rs50ne"
+>
+  <div
+    className="css-erqwtd"
+  >
+    <div
+      className="css-sglo5p"
     >
       <FullScreenForm
         history={
@@ -268,7 +332,7 @@ exports[`TimePickerContent renders recent absolute ranges correctly 1`] = `
       autoHide={false}
       autoHideDuration={200}
       autoHideTimeout={200}
-      className="css-10t714z"
+      className="css-8crqn6"
       hideTracksWhenNotNeeded={false}
       setScrollTop={[Function]}
     >
@@ -342,7 +406,7 @@ exports[`TimePickerContent renders recent absolute ranges correctly 1`] = `
         }
       />
       <div
-        className="css-1ogeuxc"
+        className="css-1nhbw8q"
       />
       <TimeRangeList
         onSelect={[Function]}
@@ -361,6 +425,44 @@ exports[`TimePickerContent renders recent absolute ranges correctly 1`] = `
         }
       />
     </CustomScrollbar>
+  </div>
+  <TimePickerFooter
+    onChangeTimeZone={[Function]}
+    timeZone="utc"
+  />
+</div>
+`;
+
+exports[`TimePickerContent renders without ranges 1`] = `
+<div
+  className="css-1rs50ne"
+>
+  <div
+    className="css-erqwtd"
+  >
+    <div
+      className="css-1wvl3n4"
+    >
+      <FullScreenForm
+        hideQuickRanges={true}
+        historyOptions={Array []}
+        isFullscreen={true}
+        onChange={[Function]}
+        onChangeTimeZone={[Function]}
+        timeZone="utc"
+        value={
+          Object {
+            "from": "2019-12-17T07:48:27.433Z",
+            "raw": Object {
+              "from": "2019-12-17T07:48:27.433Z",
+              "to": "2019-12-18T07:48:27.433Z",
+            },
+            "to": "2019-12-18T07:48:27.433Z",
+          }
+        }
+        visible={true}
+      />
+    </div>
   </div>
   <TimePickerFooter
     onChangeTimeZone={[Function]}
