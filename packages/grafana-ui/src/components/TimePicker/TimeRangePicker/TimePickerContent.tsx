@@ -159,7 +159,7 @@ export const TimePickerContentWithScreenSize: React.FC<PropsWithScreenSize> = pr
     history,
   } = props;
   const theme = useTheme();
-  const isHistoryEmpty = (history?.length ?? 0) === 0;
+  const isHistoryEmpty = !!history?.length;
   const styles = getStyles(theme, isFullscreen, isReversed, hideQuickRanges, showHistory, isHistoryEmpty);
   const historyOptions = mapToHistoryOptions(props.history, props.timeZone);
 
