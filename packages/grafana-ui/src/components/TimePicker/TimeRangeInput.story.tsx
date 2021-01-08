@@ -77,7 +77,7 @@ const getComponentWithState = (initialState: State, props: TimeRangeInputProps) 
   </UseState>
 );
 
-export const relative: Story<TimeRangeInputProps> = props => {
+export const Relative: Story<TimeRangeInputProps> = props => {
   const to = dateTime();
   const from = to.subtract(6, 'h');
 
