@@ -112,7 +112,7 @@ export const relative: Story<TimeRangePickerProps> = props => {
 
 relative.args = args;
 
-export const absolute: Story<TimeRangePickerProps> = props => {
+export const Absolute: Story<TimeRangePickerProps> = props => {
   const to = dateTime();
   const from = to.subtract(6, 'h');
 
