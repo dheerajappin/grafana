@@ -110,7 +110,7 @@ export const Relative: Story<TimeRangePickerProps> = props => {
   );
 };
 
-relative.args = args;
+Relative.args = args;
 
 export const Absolute: Story<TimeRangePickerProps> = props => {
   const to = dateTime();
@@ -133,4 +133,4 @@ export const Absolute: Story<TimeRangePickerProps> = props => {
   );
 };
 
-absolute.args = args;
+Absolute.args = args;

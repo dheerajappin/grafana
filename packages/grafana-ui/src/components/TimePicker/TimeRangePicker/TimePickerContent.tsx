@@ -1,18 +1,84 @@
 import { GrafanaTheme, isDateTime, TimeOption, TimeRange, TimeZone } from '@grafana/data';
 import { css, cx } from 'emotion';
-import React, { memo, useState } from 'react';
-import { useMedia } from 'react-use';
+import React, { memo, RefObject, useMemo, useState } from 'react';
+import { useMedia, useWindowSize } from 'react-use';
 import { stylesFactory, useTheme } from '../../../themes';
 import { CustomScrollbar } from '../../CustomScrollbar/CustomScrollbar';
 import { Icon } from '../../Icon/Icon';
+import { stylesVariables } from '../stylesVariables';
 import { mapRangeToTimeOption } from './mapper';
 import { TimePickerTitle } from './TimePickerTitle';
 import { TimeRangeForm } from './TimeRangeForm';
 import { TimeRangeList } from './TimeRangeList';
 import { TimePickerFooter } from './TimePickerFooter';
 
+interface Fits {
+  left: boolean;
+  right: boolean;
+  top: boolean;
+  bottom: boolean;
+}
+
+const checkIfFits = (windowWidth: number, windowHeight: number, bounding?: DOMRect): Fits => {
+  if (!bounding) {
+    return {
+      left: true,
+      right: true,
+      bottom: true,
+      top: true,
+    };
+  }
+
+  const { bodyTallHeight, containerWideWidth, calendarWidth } = stylesVariables;
+  const top = bounding.top - bodyTallHeight - bounding.height >= 0;
+  const bottom = bounding.bottom + bodyTallHeight + bounding.height <= windowHeight;
+  const left = bounding.right - containerWideWidth - calendarWidth >= 0;
+  const right = bounding.left + containerWideWidth + calendarWidth <= windowWidth;
+
+  return {
+    top,
+    bottom,
+    left,
+    right,
+  };
+};
+
+interface Props {
+  value: TimeRange;
+  onChange: (timeRange: TimeRange) => void;
+  onChangeTimeZone: (timeZone: TimeZone) => void;
+  /** The ref of the element that is used as a trigger for opening the content */
+  handleRef: RefObject<HTMLDivElement>;
+  timeZone?: TimeZone;
+  quickOptions?: TimeOption[];
+  otherOptions?: TimeOption[];
+  history?: TimeRange[];
+  showHistory?: boolean;
+  className?: string;
+  hideTimeZone?: boolean;
+  hideQuickRanges?: boolean;
+}
+
+export const TimePickerContent: React.FC<Props> = props => {
+  const theme = useTheme();
+  const isFullscreen = useMedia(`(min-width: ${theme.breakpoints.lg})`);
+  const { width: windowWidth, height: windowHeight } = useWindowSize();
+  const bounding = useMemo(() => props.handleRef.current?.getBoundingClientRect(), [
+    props.handleRef,
+    windowWidth,
+    windowHeight,
+  ]);
+  const fits = checkIfFits(windowWidth, windowHeight, bounding);
+  const openRight = !fits.left && fits.right;
+  const openTop = !fits.bottom && fits.top;
+
+  return (
+    <TimePickerContentWithPosition {...props} isFullscreen={isFullscreen} openRight={openRight} openTop={openTop} />
+  );
+};
+
 const getStyles = stylesFactory(
-  (theme: GrafanaTheme, isFullscreen, isReversed, hideQuickRanges, showHistory, isHistoryEmpty) => {
+  (theme: GrafanaTheme, openRight: boolean, openTop: boolean, isContainerTall: boolean, hideQuickRanges?: boolean) => {
     const containerBorder = theme.isDark ? theme.palette.dark9 : theme.palette.gray5;
 
     return {
@@ -21,37 +87,31 @@ const getStyles = stylesFactory(
         box-shadow: 0px 0px 20px ${theme.colors.dropdownShadow};
         position: absolute;
         z-index: ${theme.zIndex.dropdown};
-        width: 546px;
-        top: 116%;
+        width: ${stylesVariables.containerWideWidth}px;
+        ${openTop ? 'bottom' : 'top'}: 116%;
         border-radius: 2px;
         border: 1px solid ${containerBorder};
-        right: ${isReversed ? 'unset' : 0};
+        ${openRight ? 'left' : 'right'}: 0;
 
         @media only screen and (max-width: ${theme.breakpoints.lg}) {
-          width: 262px;
+          width: ${stylesVariables.containerNarrowWidth}px;
         }
       `,
       body: css`
         display: flex;
-        height: ${(isFullscreen && showHistory) || (!isFullscreen && (!isHistoryEmpty || !hideQuickRanges))
-          ? '381px'
-          : '217px'};
+        height: ${isContainerTall ? `${stylesVariables.bodyTallHeight}px` : `${stylesVariables.bodyShortHeight}px`};
       `,
       leftSide: css`
         display: flex;
         flex-direction: column;
-        border-right: ${isReversed ? 'none' : `1px solid ${theme.colors.border1}`};
+        border-right: ${openRight ? 'none' : `1px solid ${theme.colors.border1}`};
         width: ${!hideQuickRanges ? '60%' : '100%'};
         overflow: hidden;
-        order: ${isReversed ? 1 : 0};
-
-        @media only screen and (max-width: ${theme.breakpoints.lg}) {
-          display: none;
-        }
+        order: ${openRight ? 1 : 0};
       `,
       rightSide: css`
         width: 40% !important;
-        border-right: ${isReversed ? `1px solid ${theme.colors.border1}` : 'none'};
+        border-right: ${openRight ? `1px solid ${theme.colors.border1}` : 'none'};
 
         @media only screen and (max-width: ${theme.breakpoints.lg}) {
           width: 100% !important;
@@ -64,114 +124,47 @@ const getStyles = stylesFactory(
   }
 );
 
-const getNarrowScreenStyles = stylesFactory((theme: GrafanaTheme) => {
-  return {
-    header: css`
-      display: flex;
-      flex-direction: row;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid ${theme.colors.border1};
-      padding: 7px 9px 7px 9px;
-    `,
-    body: css`
-      border-bottom: 1px solid ${theme.colors.border1};
-      box-shadow: inset 0px 2px 2px ${theme.colors.dropdownShadow};
-    `,
-    form: css`
-      padding: 7px 9px 7px 9px;
-    `,
-  };
-});
-
-const getFullScreenStyles = stylesFactory((theme: GrafanaTheme, hideQuickRanges) => {
-  return {
-    container: css`
-      padding-top: 9px;
-      padding-left: 11px;
-      padding-right: ${!hideQuickRanges ? '20%' : '11px'};
-    `,
-    title: css`
-      margin-bottom: 11px;
-    `,
-    recent: css`
-      flex-grow: 1;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-    `,
-  };
-});
-
-const getEmptyListStyles = stylesFactory((theme: GrafanaTheme) => {
-  const formBackground = theme.isDark ? theme.palette.gray15 : theme.palette.gray98;
-
-  return {
-    container: css`
-      background-color: ${formBackground};
-      padding: 12px;
-      margin: 12px;
-
-      a,
-      span {
-        font-size: 13px;
-      }
-    `,
-    link: css`
-      color: ${theme.colors.linkExternal};
-    `,
-  };
-});
-
-interface Props {
-  value: TimeRange;
-  onChange: (timeRange: TimeRange) => void;
-  onChangeTimeZone: (timeZone: TimeZone) => void;
-  timeZone?: TimeZone;
-  quickOptions?: TimeOption[];
-  otherOptions?: TimeOption[];
-  history?: TimeRange[];
-  showHistory?: boolean;
-  className?: string;
-  hideTimeZone?: boolean;
-  /** Reverse the order of relative and absolute range pickers. Used to left align the picker in forms */
-  isReversed?: boolean;
-  hideQuickRanges?: boolean;
+function mapToHistoryOptions(ranges?: TimeRange[], timeZone?: TimeZone): TimeOption[] {
+  if (!Array.isArray(ranges) || ranges.length === 0) {
+    return [];
+  }
+  return ranges.slice(ranges.length - 4).map(range => mapRangeToTimeOption(range, timeZone));
 }
 
-interface PropsWithScreenSize extends Props {
+interface PropsWithPosition extends Omit<Props, 'handleRef'> {
   isFullscreen: boolean;
+  openRight: boolean;
+  openTop: boolean;
 }
 
-interface FormProps extends Omit<Props, 'history'> {
-  visible: boolean;
-  historyOptions?: TimeOption[];
-}
-
-export const TimePickerContentWithScreenSize: React.FC<PropsWithScreenSize> = props => {
+export const TimePickerContentWithPosition: React.FC<PropsWithPosition> = props => {
   const {
     quickOptions = [],
     otherOptions = [],
-    isFullscreen,
-    isReversed,
     hideQuickRanges,
     showHistory,
     history,
+    isFullscreen,
+    openRight,
+    openTop,
   } = props;
   const theme = useTheme();
   const isHistoryEmpty = !!history?.length;
-  const styles = getStyles(theme, isFullscreen, isReversed, hideQuickRanges, showHistory, isHistoryEmpty);
+  const isContainerTall = (isFullscreen && showHistory) || (!isFullscreen && (!isHistoryEmpty || !hideQuickRanges));
+  const styles = getStyles(theme, openRight, openTop, isContainerTall, hideQuickRanges);
   const historyOptions = mapToHistoryOptions(props.history, props.timeZone);
 
   return (
     <div className={cx(styles.container, props.className)}>
       <div className={styles.body}>
-        <div className={styles.leftSide}>
-          <FullScreenForm {...props} visible={isFullscreen} historyOptions={historyOptions} />
-        </div>
+        {isFullscreen && (
+          <div className={styles.leftSide}>
+            <FullScreenForm {...props} historyOptions={historyOptions} />
+          </div>
+        )}
         {(!isFullscreen || !hideQuickRanges) && (
           <CustomScrollbar className={styles.rightSide}>
-            <NarrowScreenForm {...props} visible={!isFullscreen} historyOptions={historyOptions} />
+            {!isFullscreen && <NarrowScreenForm {...props} historyOptions={historyOptions} />}
             {!hideQuickRanges && (
               <>
                 <TimeRangeList
@@ -201,18 +194,31 @@ export const TimePickerContentWithScreenSize: React.FC<PropsWithScreenSize> = pr
   );
 };
 
-export const TimePickerContent: React.FC<Props> = props => {
-  const theme = useTheme();
-  const isFullscreen = useMedia(`(min-width: ${theme.breakpoints.lg})`);
+interface FormProps extends Omit<PropsWithPosition, 'history'> {
+  historyOptions?: TimeOption[];
+}
 
-  return <TimePickerContentWithScreenSize {...props} isFullscreen={isFullscreen} />;
-};
+const getNarrowScreenStyles = stylesFactory((theme: GrafanaTheme) => {
+  return {
+    header: css`
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid ${theme.colors.border1};
+      padding: 7px 9px 7px 9px;
+    `,
+    body: css`
+      border-bottom: 1px solid ${theme.colors.border1};
+      box-shadow: inset 0px 2px 2px ${theme.colors.dropdownShadow};
+    `,
+    form: css`
+      padding: 7px 9px 7px 9px;
+    `,
+  };
+});
 
 const NarrowScreenForm: React.FC<FormProps> = props => {
-  if (!props.visible) {
-    return null;
-  }
-
   const theme = useTheme();
   const { value, hideQuickRanges, onChange, timeZone, historyOptions, showHistory } = props;
   const isAbsolute = isDateTime(value.raw.from) || isDateTime(value.raw.to);
@@ -255,13 +261,28 @@ const NarrowScreenForm: React.FC<FormProps> = props => {
   );
 };
 
+const getFullScreenStyles = stylesFactory((theme: GrafanaTheme, hideQuickRanges?: boolean) => {
+  return {
+    container: css`
+      padding-top: 9px;
+      padding-left: 11px;
+      padding-right: ${!hideQuickRanges ? '20%' : '11px'};
+    `,
+    title: css`
+      margin-bottom: 11px;
+    `,
+    recent: css`
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+    `,
+  };
+});
+
 const FullScreenForm: React.FC<FormProps> = props => {
   const theme = useTheme();
   const styles = getFullScreenStyles(theme, props.hideQuickRanges);
-
-  if (!props.visible) {
-    return null;
-  }
 
   return (
     <>
@@ -274,7 +295,7 @@ const FullScreenForm: React.FC<FormProps> = props => {
           timeZone={props.timeZone}
           onApply={props.onChange}
           isFullscreen={true}
-          isReversed={props.isReversed}
+          isReversed={props.openRight}
         />
       </div>
       {props.showHistory && (
@@ -292,6 +313,26 @@ const FullScreenForm: React.FC<FormProps> = props => {
     </>
   );
 };
+
+const getEmptyListStyles = stylesFactory((theme: GrafanaTheme) => {
+  const formBackground = theme.isDark ? theme.palette.gray15 : theme.palette.gray98;
+
+  return {
+    container: css`
+      background-color: ${formBackground};
+      padding: 12px;
+      margin: 12px;
+
+      a,
+      span {
+        font-size: 13px;
+      }
+    `,
+    link: css`
+      color: ${theme.colors.linkExternal};
+    `,
+  };
+});
 
 const EmptyRecentList = memo(() => {
   const theme = useTheme();
@@ -318,12 +359,5 @@ const EmptyRecentList = memo(() => {
     </div>
   );
 });
-
-function mapToHistoryOptions(ranges?: TimeRange[], timeZone?: TimeZone): TimeOption[] {
-  if (!Array.isArray(ranges) || ranges.length === 0) {
-    return [];
-  }
-  return ranges.slice(ranges.length - 4).map(range => mapRangeToTimeOption(range, timeZone));
-}
 
 EmptyRecentList.displayName = 'EmptyRecentList';

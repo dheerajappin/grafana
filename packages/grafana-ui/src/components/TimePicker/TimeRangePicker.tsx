@@ -76,6 +76,8 @@ export interface State {
 }
 
 export class UnthemedTimeRangePicker extends PureComponent<TimeRangePickerProps, State> {
+  handleRef = React.createRef<HTMLDivElement>();
+
   state: State = {
     isOpen: false,
   };
@@ -123,7 +125,7 @@ export class UnthemedTimeRangePicker extends PureComponent<TimeRangePickerProps,
 
     return (
       <div className={styles.container}>
-        <div className={styles.buttons}>
+        <div className={styles.buttons} ref={this.handleRef}>
           {hasAbsolute && (
             <button className="btn navbar-button navbar-button--tight" onClick={onMoveBackward}>
               <Icon name="angle-left" size="lg" />
@@ -140,6 +142,7 @@ export class UnthemedTimeRangePicker extends PureComponent<TimeRangePickerProps,
             {isOpen && (
               <ClickOutsideWrapper includeButtonPress={false} onClick={this.onClose}>
                 <TimePickerContent
+                  handleRef={this.handleRef}
                   timeZone={timeZone}
                   value={value}
                   onChange={this.onChange}

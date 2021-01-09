@@ -1,4 +1,4 @@
-import React, { FC, FormEvent, MouseEvent, useState } from 'react';
+import React, { FC, FormEvent, MouseEvent, useRef, useState } from 'react';
 import { css, cx } from 'emotion';
 import { dateMath, dateTime, getDefaultTimeRange, GrafanaTheme, TimeRange, TimeZone } from '@grafana/data';
 import { useStyles } from '../../themes/ThemeContext';
@@ -41,6 +41,7 @@ export const TimeRangeInput: FC<TimeRangeInputProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const styles = useStyles(getStyles);
+  const handleRef = useRef(null);
 
   const onOpen = (event: FormEvent<HTMLDivElement>) => {
     event.stopPropagation();
@@ -66,7 +67,13 @@ export const TimeRangeInput: FC<TimeRangeInputProps> = ({
 
   return (
     <div className={styles.container}>
-      <div tabIndex={0} className={styles.pickerInput} aria-label="TimePicker Open Button" onClick={onOpen}>
+      <div
+        ref={handleRef}
+        tabIndex={0}
+        className={styles.pickerInput}
+        aria-label="TimePicker Open Button"
+        onClick={onOpen}
+      >
         {isValidTimeRange(value) ? (
           <TimePickerButtonLabel value={value as TimeRange} timeZone={timeZone} />
         ) : (
@@ -83,6 +90,7 @@ export const TimeRangeInput: FC<TimeRangeInputProps> = ({
       {isOpen && (
         <ClickOutsideWrapper includeButtonPress={false} onClick={onClose}>
           <TimePickerContent
+            handleRef={handleRef}
             timeZone={timeZone}
             value={isValidTimeRange(value) ? (value as TimeRange) : getDefaultTimeRange()}
             onChange={onRangeChange}
@@ -91,7 +99,6 @@ export const TimeRangeInput: FC<TimeRangeInputProps> = ({
             onChangeTimeZone={onChangeTimeZone || noop}
             className={styles.content}
             hideTimeZone={hideTimeZone}
-            isReversed={isReversed}
             hideQuickRanges={hideQuickRanges}
           />
         </ClickOutsideWrapper>

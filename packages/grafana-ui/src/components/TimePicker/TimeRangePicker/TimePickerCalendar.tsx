@@ -3,6 +3,7 @@ import { css } from 'emotion';
 import Calendar from 'react-calendar/dist/entry.nostyle';
 import { dateTime, DateTime, dateTimeParse, GrafanaTheme, TimeZone } from '@grafana/data';
 import { stylesFactory, useTheme } from '../../../themes';
+import { stylesVariables } from '../stylesVariables';
 import { TimePickerTitle } from './TimePickerTitle';
 import { Button } from '../../Button';
 import { Icon } from '../../Icon/Icon';
@@ -43,7 +44,7 @@ const getStyles = stylesFactory((theme: GrafanaTheme, isReversed = false) => {
     `,
     content: css`
       margin: 0 auto;
-      width: 268px;
+      width: ${stylesVariables.calendarWidth}px;
     `,
     backdrop: css`
       position: fixed;

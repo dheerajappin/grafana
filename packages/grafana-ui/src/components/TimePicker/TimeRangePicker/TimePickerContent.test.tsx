@@ -1,18 +1,20 @@
 import React from 'react';
 import { shallow } from 'enzyme';
-import { TimePickerContentWithScreenSize } from './TimePickerContent';
+import { TimePickerContentWithPosition } from './TimePickerContent';
 import { dateTime, TimeRange } from '@grafana/data';
 
 describe('TimePickerContent', () => {
   it('renders correctly in full screen', () => {
     const value = createTimeRange('2019-12-17T07:48:27.433Z', '2019-12-18T07:48:27.433Z');
     const wrapper = shallow(
-      <TimePickerContentWithScreenSize
+      <TimePickerContentWithPosition
         onChangeTimeZone={() => {}}
         onChange={value => {}}
         timeZone="utc"
         value={value}
         isFullscreen={true}
+        openRight={false}
+        openTop={false}
       />
     );
     expect(wrapper).toMatchSnapshot();
@@ -21,12 +23,14 @@ describe('TimePickerContent', () => {
   it('renders correctly in narrow screen', () => {
     const value = createTimeRange('2019-12-17T07:48:27.433Z', '2019-12-18T07:48:27.433Z');
     const wrapper = shallow(
-      <TimePickerContentWithScreenSize
+      <TimePickerContentWithPosition
         onChangeTimeZone={() => {}}
         onChange={value => {}}
         timeZone="utc"
         value={value}
         isFullscreen={false}
+        openRight={false}
+        openTop={false}
       />
     );
     expect(wrapper).toMatchSnapshot();
@@ -40,12 +44,14 @@ describe('TimePickerContent', () => {
     ];
 
     const wrapper = shallow(
-      <TimePickerContentWithScreenSize
+      <TimePickerContentWithPosition
         onChangeTimeZone={() => {}}
         onChange={value => {}}
         timeZone="utc"
         value={value}
         isFullscreen={true}
+        openRight={false}
+        openTop={false}
         history={history}
       />
     );
@@ -56,12 +62,14 @@ describe('TimePickerContent', () => {
     const value = createTimeRange('2019-12-17T07:48:27.433Z', '2019-12-18T07:48:27.433Z');
 
     const wrapper = shallow(
-      <TimePickerContentWithScreenSize
+      <TimePickerContentWithPosition
         onChangeTimeZone={() => {}}
         onChange={value => {}}
         timeZone="utc"
         value={value}
         isFullscreen={true}
+        openRight={false}
+        openTop={false}
         hideQuickRanges={true}
       />
     );
@@ -73,12 +81,14 @@ describe('TimePickerContent', () => {
     const value = createTimeRange('2019-12-17T07:48:27.433Z', '2019-12-18T07:48:27.433Z');
 
     const wrapper = shallow(
-      <TimePickerContentWithScreenSize
+      <TimePickerContentWithPosition
         onChangeTimeZone={() => {}}
         onChange={value => {}}
         timeZone="utc"
         value={value}
         isFullscreen={false}
+        openRight={false}
+        openTop={false}
         hideQuickRanges={true}
       />
     );
