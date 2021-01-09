@@ -22,9 +22,6 @@ export default {
     clearable: {
       control: 'boolean',
     },
-    isReversed: {
-      control: 'boolean',
-    },
     hideQuickRanges: {
       control: 'boolean',
     },
@@ -40,7 +37,6 @@ const args = {
   hideTimeZone: false,
   placeholder: undefined,
   clearable: false,
-  isReversed: true,
   hideQuickRanges: false,
 };
 

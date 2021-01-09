@@ -22,7 +22,6 @@ export interface TimeRangeInputProps {
   hideTimeZone?: boolean;
   placeholder?: string;
   clearable?: boolean;
-  isReversed?: boolean;
   hideQuickRanges?: boolean;
 }
 
@@ -36,7 +35,6 @@ export const TimeRangeInput: FC<TimeRangeInputProps> = ({
   hideTimeZone = true,
   timeZone = 'browser',
   placeholder = 'Select time range',
-  isReversed = true,
   hideQuickRanges = false,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
